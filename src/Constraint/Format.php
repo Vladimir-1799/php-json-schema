@@ -29,7 +29,7 @@ class Format
     const URI_TEMPLATE = 'uri-template';
 
     public static $strictDateTimeValidation = false;
-
+    
     private static $dateRegexPart = '(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])';
     private static $timeRegexPart = '([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)([01][0-9]|2[0-3]):?([0-5][0-9])?)?';
     private static $jsonPointerRegex = '_^(?:/|(?:/[^/#]*)*)$_';
@@ -42,8 +42,11 @@ class Format
             case self::DATE_TIME:
                 return self::dateTimeError($data);
             case self::DATE:
-            case self::FULL_DATE:
-                return preg_match('/^' . self::$dateRegexPart . '$/i', $data) ? null : 'Invalid date';
+            case self::FULL_DATE: {
+                list($y, $m, $d) = array_pad(explode('-', $data, 3), 3, 0);
+                return (ctype_digit("$y$m$d") && checkdate($m, $d, $y)) ? null : 'Invalid date';
+            }
+                //return preg_match('/^' . self::$dateRegexPart . '$/i', $data) ? null : 'Invalid date';
             case self::TIME:
             case self::FULL_TIME:
                 return preg_match('/^' . self::$timeRegexPart . '$/i', $data) ? null : 'Invalid time';
